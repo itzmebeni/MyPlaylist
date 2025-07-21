@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'addplaylist.dart';
 import 'Music.dart';
 import 'ItemCard.dart';
 
@@ -11,48 +12,114 @@ class ListItems extends StatefulWidget {
 
 class _ListItemState extends State<ListItems> {
   List<Music> musics = [
-    Music(name: 'Pangarap lang kita', artist: 'Parokya ni Edgar', rating: 10),
-    Music(name: 'Buko', artist: 'Jireh Lim', rating: 10),
-    Music(name: 'Kursunada', artist: 'Adie', rating: 10),
-    Music(name: 'When I met you', artist: 'Apo Hiking Society', rating: 10),
-    Music(name: 'Naiilang', artist: 'Le John', rating: 10),
-    Music(name: 'Sino', artist: 'Unique Salonga', rating: 10),
-    Music(name: 'With a Smile', artist: 'Eraserheads', rating: 10),
-    Music(name: 'Borrowed Time', artist: 'Cueshé', rating: 10),
+    Music(name: 'Pangarap lang kita', artist: 'Parokya ni Edgar', rating: 5),
+    Music(name: 'Buko', artist: 'Jireh Lim', rating: 5),
+    Music(name: 'Kursunada', artist: 'Adie', rating: 5),
+    Music(name: 'When I met you', artist: 'Apo Hiking Society', rating: 5),
+    Music(name: 'Naiilang', artist: 'Le John', rating: 5),
+    Music(name: 'Sino', artist: 'Unique Salonga', rating: 5),
+    Music(name: 'With a Smile', artist: 'Eraserheads', rating: 5),
+    Music(name: 'Borrowed Time', artist: 'Cueshé', rating: 5),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          'My Playlist',
-          style: TextStyle(
-            color: Colors.pinkAccent,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Your Library",
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.pinkAccent,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const AddPlaylist()),
+                      );
+                    },
+                    icon: const Icon(Icons.add_circle, color: Colors.pinkAccent, size: 30),
+                    tooltip: 'Create Playlist',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Albums",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              AlbumCard(
+                title: "Mylove's Playlist",
+                count: musics.length,
+                onTap: () {
+                  Navigator.pushNamed(context, '/beni');
+                },
+              ),
+              const SizedBox(height: 10),
+              AlbumCard(
+                title: "Liked Songs",
+                count: 0,
+                onTap: () {
+                  // TODO: Navigate to liked songs
+                },
+              ),
+              const SizedBox(height: 10),
+              AlbumCard(
+                title: "Add Artist",
+                count: 0,
+                icon: Icons.person_add,
+                onTap: () {
+                  // TODO: Navigate to add artist
+                },
+              ),
+            ],
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: musics.map((music) {
-            return Itemcard(musics: music);
-          }).toList(),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.pinkAccent,
-        onPressed: () {
-          // Add your add-music logic here (e.g., show dialog, navigate to form, etc.)
-        },
-        child: const Icon(Icons.add, color: Colors.white),
-        tooltip: 'Add Music',
+    );
+  }
+}
+
+class AlbumCard extends StatelessWidget {
+  final String title;
+  final int count;
+  final VoidCallback onTap;
+  final IconData icon;
+
+  const AlbumCard({
+    super.key,
+    required this.title,
+    required this.count,
+    required this.onTap,
+    this.icon = Icons.album,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: Icon(icon, color: Colors.pinkAccent),
+        title: Text(title),
+        subtitle: Text('$count songs'),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: onTap,
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'addplaylist.dart';
 import 'Music.dart';
 
 class Itemcard extends StatelessWidget {
@@ -8,14 +9,13 @@ class Itemcard extends StatelessWidget {
     required this.musics,
   });
 
-  // Converts 10-scale rating to 5-star equivalent
+  // Directly using the 5-star rating
   int getStarCount(int rating) {
-    if (rating >= 10) return 5;
-    if (rating >= 9) return 4;
-    if (rating >= 8) return 4;
-    if (rating >= 7) return 3;
-    if (rating >= 6) return 3;
-    return 2;
+    if (rating >= 5) return 5;
+    if (rating >= 4) return 4;
+    if (rating >= 3) return 3;
+    if (rating >= 2) return 2;
+    return 1;  // For rating 1
   }
 
   @override
@@ -31,7 +31,7 @@ class Itemcard extends StatelessWidget {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: Colors.pinkAccent.withOpacity(0.2),
+              color: Colors.pink[100]!.withOpacity(0.3), // Light red background
               shape: BoxShape.circle,
             ),
             child: IconButton(
@@ -53,7 +53,7 @@ class Itemcard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: Colors.black, // White text on light background
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -61,7 +61,7 @@ class Itemcard extends StatelessWidget {
                   musics.artist,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.purpleAccent[100],
+                    color: Colors.pink[200], // Light pink for artist name
                   ),
                 ),
               ],
@@ -76,15 +76,18 @@ class Itemcard extends StatelessWidget {
                   5,
                       (index) => Icon(
                     index < stars ? Icons.star : Icons.star_border,
-                    color: Colors.pinkAccent,
+                    color: Colors.pinkAccent, // Pink stars
                     size: 18,
                   ),
                 ),
               ),
               const SizedBox(width: 12),
               IconButton(
-                icon: const Icon(Icons.more_vert, color: Colors.white),
+                icon: const Icon(Icons.more_vert, color: Colors.black), // Black icon for contrast
                 onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context)=> const AddPlaylist())
+                  );
                   // More options
                 },
               ),
