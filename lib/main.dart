@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-// Import your screens from the myPage folder
+// Screens from the myPage folder
 import 'myPage/Dashboard.dart';
 import 'myPage/ListItems.dart';
 import 'myPage/beniPlaylist.dart';
 import 'myPage/addplaylist.dart';
+import 'myPage/liked_songs.dart'; // contains LikedSongsScreen
 
 void main() {
   runApp(const MyMusicApp());
@@ -30,8 +31,8 @@ class MyMusicApp extends StatelessWidget {
       routes: {
         '/': (context) => const Dashboard(),
         '/list': (context) => const ListItems(),
-        '/beni': (context) => BeniPlaylist(),
-        '/add': (context) => const AddPlaylist(),
+        '/beni': (context) => BeniPlaylist(initialName: ''),
+        '/likedsongs': (context) => const LikedSongsScreen(), // ✅ fixed
       },
     );
   }

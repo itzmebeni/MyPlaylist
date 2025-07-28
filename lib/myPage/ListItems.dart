@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'addplaylist.dart';
 import 'Music.dart';
 import 'ItemCard.dart';
+import 'beniPlaylist.dart';
+import 'liked_songs.dart';
 
 class ListItems extends StatefulWidget {
   const ListItems({super.key});
@@ -22,6 +24,17 @@ class _ListItemState extends State<ListItems> {
     Music(name: 'Borrowed Time', artist: 'Cueshé', rating: 5),
   ];
 
+  String playlistName = "Beni's Playlist";
+  List<Map<String, dynamic>> playlists = [];
+
+  void _openLikedSongsScreen(BuildContext context) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LikedSongsScreen()),
+    );
+    setState(() {}); // Refresh count when returning
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,28 +44,13 @@ class _ListItemState extends State<ListItems> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Your Library",
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.pinkAccent,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const AddPlaylist()),
-                      );
-                    },
-                    icon: const Icon(Icons.add_circle, color: Colors.pinkAccent, size: 30),
-                    tooltip: 'Create Playlist',
-                  ),
-                ],
+              const Text(
+                "Your Library",
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.pinkAccent,
+                ),
               ),
               const SizedBox(height: 20),
               const Text(
@@ -63,29 +61,41 @@ class _ListItemState extends State<ListItems> {
                 ),
               ),
               const SizedBox(height: 10),
+
               AlbumCard(
-                title: "Mylove's Playlist",
+                title: playlistName,
                 count: musics.length,
-                onTap: () {
-                  Navigator.pushNamed(context, '/beni');
+                onTap: () async {
+                  final updatedName = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BeniPlaylist(initialName: playlistName),
+                    ),
+                  );
+
+                  if (updatedName != null && updatedName is String) {
+                    setState(() {
+                      playlistName = updatedName;
+                    });
+                  }
                 },
               ),
               const SizedBox(height: 10),
+
+              for (var playlist in playlists)
+                AlbumCard(
+                  title: playlist['name'],
+                  count: playlist['count'] ?? 0,
+                  onTap: () {},
+                ),
+
+              const SizedBox(height: 10),
+
               AlbumCard(
                 title: "Liked Songs",
-                count: 0,
-                onTap: () {
-                  // TODO: Navigate to liked songs
-                },
-              ),
-              const SizedBox(height: 10),
-              AlbumCard(
-                title: "Add Artist",
-                count: 0,
-                icon: Icons.person_add,
-                onTap: () {
-                  // TODO: Navigate to add artist
-                },
+                count: LikedSongsManager.likedSongs.length,
+                icon: Icons.favorite,
+                onTap: () => _openLikedSongsScreen(context),
               ),
             ],
           ),

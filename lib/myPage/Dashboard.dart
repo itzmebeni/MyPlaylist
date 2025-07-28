@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'ListItems.dart'; // Ensure path is correct
-import 'beniPlaylist.dart'; // ✅ Import BeniPlaylist screen
+import 'ListItems.dart';
+import 'beniPlaylist.dart';
+import 'liked_songs.dart';
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
@@ -18,7 +19,7 @@ class Dashboard extends StatelessWidget {
           backgroundColor: Colors.pinkAccent,
           elevation: 0,
           titleTextStyle: TextStyle(
-            fontSize: 24, // smaller than 28
+            fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
@@ -47,7 +48,7 @@ class Dashboard extends StatelessWidget {
       ),
       home: const AppleMusicHomePage(),
       routes: {
-        '/beni': (context) => BeniPlaylist(), // ✅ Route for Beni's Playlist
+        '/beni': (context) => BeniPlaylist(initialName: ''),
       },
     );
   }
@@ -92,6 +93,78 @@ class _AppleMusicHomePageState extends State<AppleMusicHomePage> {
   }
 }
 
+void playSong(BuildContext context, String title, String artist) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('Now playing: $title by $artist'),
+      duration: const Duration(seconds: 2),
+    ),
+  );
+}
+
+void showBottomSheetOptions(
+    BuildContext context, String title, String artist, bool isSearch) {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (BuildContext context) {
+      final List<Map<String, dynamic>> options = isSearch
+          ? [
+        {'label': 'Play this Song', 'icon': Icons.play_arrow},
+        {'label': 'Add to Liked Songs', 'icon': Icons.favorite_border},
+        {'label': "Add to Beni's Playlist", 'icon': Icons.playlist_add},
+      ]
+          : [
+        {'label': 'Play this Song', 'icon': Icons.play_arrow},
+        {'label': 'Share', 'icon': Icons.share},
+        {'label': 'Add to Liked Songs', 'icon': Icons.favorite_border},
+        {'label': "Add to Beni's Playlist", 'icon': Icons.playlist_add},
+      ];
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: options.map((option) {
+            return ListTile(
+              leading: Icon(option['icon'], color: Colors.pinkAccent),
+              title: Text(option['label']),
+              onTap: () {
+                Navigator.pop(context);
+
+                if (option['label'] == 'Play this Song') {
+                  playSong(context, title, artist);
+                } else if (option['label'] == 'Add to Liked Songs') {
+                  // ✅ Add to liked songs if not already there
+                  final alreadyLiked = LikedSongsManager.likedSongs.any(
+                        (song) => song['title'] == title && song['artist'] == artist,
+                  );
+                  if (!alreadyLiked) {
+                    LikedSongsManager.likedSongs.add({
+                      'title': title,
+                      'artist': artist,
+                    });
+                  }
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('"$title" added to Liked Songs')),
+                  );
+                } else if (option['label'] == "Add to Beni's Playlist") {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('"$title" added to Beni\'s Playlist')),
+                  );
+                }
+              },
+            );
+          }).toList(),
+        ),
+      );
+    },
+  );
+}
+
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
 
@@ -107,7 +180,7 @@ class _SearchPageState extends State<SearchPage> {
     {'title': 'Pangarap Lang Kita', 'artist': 'Parokya ni Edgar'},
     {'title': 'Buko', 'artist': 'Jireh Lim'},
     {'title': 'Kursunada', 'artist': 'Adie'},
-    {'title': 'Bakit Pa', 'artist': 'Jessa Zaragoza'},
+    {'title': 'When I Met You', 'artist': 'Apo Hiking Society'},
   ];
 
   List<Map<String, String>> _filteredSongs = [];
@@ -129,7 +202,7 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
-  Widget musicCard(String title, String artist, Color color) {
+  Widget musicCard(BuildContext context, String title, String artist, Color color) {
     return Card(
       color: Colors.white,
       margin: const EdgeInsets.only(bottom: 10),
@@ -146,15 +219,13 @@ class _SearchPageState extends State<SearchPage> {
           ),
           child: const Icon(Icons.music_note, color: Colors.white, size: 24),
         ),
-        title: Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-        ),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
         subtitle: Text(artist, style: const TextStyle(fontSize: 12)),
-        trailing: const Icon(Icons.more_horiz, color: Colors.black),
-        onTap: () {
-          debugPrint('Playing $title by $artist');
-        },
+        trailing: IconButton(
+          icon: const Icon(Icons.more_horiz, color: Colors.black),
+          onPressed: () => showBottomSheetOptions(context, title, artist, true),
+        ),
+        onTap: () => playSong(context, title, artist),
       ),
     );
   }
@@ -179,7 +250,6 @@ class _SearchPageState extends State<SearchPage> {
         child: Column(
           children: [
             const SizedBox(height: 10),
-            // Centered Search Bar
             Center(
               child: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.85,
@@ -200,18 +270,11 @@ class _SearchPageState extends State<SearchPage> {
               ),
             ),
             const SizedBox(height: 24),
-
-            // Title
             Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                'Recommended',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+              child: Text('Recommended', style: Theme.of(context).textTheme.titleLarge),
             ),
             const SizedBox(height: 12),
-
-            // Song List
             Expanded(
               child: _filteredSongs.isEmpty
                   ? const Center(child: Text('No songs found', style: TextStyle(fontSize: 13)))
@@ -220,10 +283,7 @@ class _SearchPageState extends State<SearchPage> {
                 itemBuilder: (context, index) {
                   final song = _filteredSongs[index];
                   return musicCard(
-                    song['title']!,
-                    song['artist']!,
-                    _getColorForIndex(index),
-                  );
+                      context, song['title']!, song['artist']!, _getColorForIndex(index));
                 },
               ),
             ),
@@ -237,7 +297,7 @@ class _SearchPageState extends State<SearchPage> {
 class BrowsePage extends StatelessWidget {
   const BrowsePage({super.key});
 
-  Widget musicCard(String title, String artist, Color color) {
+  Widget musicCard(BuildContext context, String title, String artist, Color color) {
     return Card(
       color: Colors.white,
       margin: const EdgeInsets.only(bottom: 14),
@@ -254,12 +314,13 @@ class BrowsePage extends StatelessWidget {
           ),
           child: const Icon(Icons.music_note, color: Colors.white, size: 24),
         ),
-        title: Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-        ),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
         subtitle: Text(artist, style: const TextStyle(fontSize: 12)),
-        trailing: const Icon(Icons.more_horiz, color: Colors.black),
+        trailing: IconButton(
+          icon: const Icon(Icons.more_horiz, color: Colors.black),
+          onPressed: () => showBottomSheetOptions(context, title, artist, false),
+        ),
+        onTap: () => playSong(context, title, artist),
       ),
     );
   }
@@ -272,14 +333,14 @@ class BrowsePage extends StatelessWidget {
         children: [
           const Text('Browse', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           const SizedBox(height: 24),
-          musicCard('Pangarap Lang Kita', 'Parokya ni Edgar', Colors.pinkAccent),
-          musicCard('Buko', 'Jireh Lim', Colors.purple[200]!),
-          musicCard('Kursunada', 'Adie', Colors.blue[200]!),
+          musicCard(context, 'Pangarap Lang Kita', 'Parokya ni Edgar', Colors.pinkAccent),
+          musicCard(context, 'Buko', 'Jireh Lim', Colors.purple[200]!),
+          musicCard(context, 'Kursunada', 'Adie', Colors.blue[200]!),
           const SizedBox(height: 30),
           const Text('Recommended', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
-          musicCard('With a Smile', 'Eraserheads', Colors.orange[200]!),
-          musicCard('Sino', 'Unique Salonga', Colors.pink[100]!),
+          musicCard(context, 'With a Smile', 'Eraserheads', Colors.orange[200]!),
+          musicCard(context, 'Sino', 'Unique Salonga', Colors.pink[100]!),
         ],
       ),
     );
@@ -291,6 +352,6 @@ class LibraryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ListItems(); // ✅ List page
+    return const ListItems();
   }
 }
