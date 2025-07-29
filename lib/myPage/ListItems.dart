@@ -32,7 +32,17 @@ class _ListItemState extends State<ListItems> {
       context,
       MaterialPageRoute(builder: (context) => const LikedSongsScreen()),
     );
-    setState(() {}); // Refresh count when returning
+    setState(() {}); // Refresh count
+  }
+
+  void _openBeniPlaylist(BuildContext context) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BeniPlaylist(initialName: playlistName),
+      ),
+    );
+    setState(() {}); // Refresh count after returning
   }
 
   @override
@@ -64,21 +74,8 @@ class _ListItemState extends State<ListItems> {
 
               AlbumCard(
                 title: playlistName,
-                count: musics.length,
-                onTap: () async {
-                  final updatedName = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BeniPlaylist(initialName: playlistName),
-                    ),
-                  );
-
-                  if (updatedName != null && updatedName is String) {
-                    setState(() {
-                      playlistName = updatedName;
-                    });
-                  }
-                },
+                count: BeniPlaylistManager.songs.length,
+                onTap: () => _openBeniPlaylist(context),
               ),
               const SizedBox(height: 10),
 

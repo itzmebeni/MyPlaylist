@@ -12,13 +12,6 @@ class LikedSongsScreen extends StatefulWidget {
 }
 
 class _LikedSongsScreenState extends State<LikedSongsScreen> {
-  void _playSong(Map<String, String> song) {
-    // TODO: Replace with actual playback using just_audio
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Now playing: ${song['title']}')),
-    );
-  }
-
   void _removeSong(int index) async {
     final song = LikedSongsManager.likedSongs[index];
 
@@ -30,8 +23,9 @@ class _LikedSongsScreenState extends State<LikedSongsScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Remove', style: TextStyle(color: Colors.red)))
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+          ),
         ],
       ),
     );
@@ -72,8 +66,9 @@ class _LikedSongsScreenState extends State<LikedSongsScreen> {
                   actions: [
                     TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
                     TextButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: const Text('Delete', style: TextStyle(color: Colors.red))),
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                    ),
                   ],
                 ),
               );
@@ -100,18 +95,9 @@ class _LikedSongsScreenState extends State<LikedSongsScreen> {
             leading: const Icon(Icons.favorite, color: Colors.pinkAccent),
             title: Text(song['title'] ?? ''),
             subtitle: Text(song['artist'] ?? ''),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.play_arrow, color: Colors.pink),
-                  onPressed: () => _playSong(song),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.grey),
-                  onPressed: () => _removeSong(index),
-                ),
-              ],
+            trailing: IconButton(
+              icon: const Icon(Icons.delete, color: Colors.grey),
+              onPressed: () => _removeSong(index),
             ),
           );
         },
